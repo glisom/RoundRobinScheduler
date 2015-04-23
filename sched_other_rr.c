@@ -83,7 +83,7 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
 	struct list_head *queue = &rq->other_rr.queue;
 	struct other_rr_rq *other_rr_rq = &rq->other_rr;
 
-	if (other_rr_rq_running < 1) {
+	if (other_rr_rq->nr_running < 1) {
     return NULL;
   }
   
