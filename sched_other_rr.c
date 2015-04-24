@@ -31,11 +31,9 @@ static void update_curr_other_rr(struct rq *rq)
  */
 static void enqueue_task_other_rr(struct rq *rq, struct task_struct *p, int wakeup, bool b)
 {
-  if (wakeup) {
-    update_curr_other_rr(rq);
-    list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
-    rq->other_rr.nr_running++;
-  }
+  update_curr_other_rr(rq);
+  list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
+  rq->other_rr.nr_running++;
 }
 
 static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int sleep)
@@ -94,13 +92,22 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
 	 */
 
 	next->se.exec_start = rq->clock;
-	
 	/* you need to return the selected task here */
-	return NULL;
+	return next;
 }
 
 static void put_prev_task_other_rr(struct rq *rq, struct task_struct *p)
 {
+  /*
+  if (other_rr_time_slice == 0)
+    return;
+
+  if (--p -> task_time_slice == 0) {
+    p -> task_time_slice = other_rr_time_slice;
+    requeue_task_other_rr(rq, p);
+    set_tsk_need_resched(p);
+  }
+  */
 	update_curr_other_rr(rq);
 	p->se.exec_start = 0;
 }
@@ -193,10 +200,10 @@ static void task_tick_other_rr(struct rq *rq, struct task_struct *p,int queued)
   if (other_rr_time_slice == 0) {
     return;
   } else {
-    if (other_rr_time_slice != 0) {
+    if (p->task_time_slice != 0) { 
       p->task_time_slice--;
     } else {
-        p->task_time_slice = other_rr_time_slice;\
+        p->task_time_slice = other_rr_time_slice;
         set_tsk_need_resched(p);
         requeue_task_other_rr(rq, p);
     }
