@@ -31,17 +31,23 @@ static void update_curr_other_rr(struct rq *rq)
  */
 static void enqueue_task_other_rr(struct rq *rq, struct task_struct *p, int wakeup, bool b)
 {
-    update_curr_other_rr(rq);
-    list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
-    rq->other_rr.nr_running++;
+    if (wakeup) {
+        update_curr_other_rr(rq);
+        // add task to list tail, increment number of running tasks
+        list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
+        rq->other_rr.nr_running++;
+    }
 }
 
 static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int sleep)
 {
-    // first update the task's runtime statistics
-    update_curr_other_rr(rq);
-    list_del(&p->other_rr_run_list);
-    rq->other_rr.nr_running--;
+    if (sleep) {
+        // first update the task's runtime statistics
+        update_curr_other_rr(rq);
+        // remove task from head, decrement number of running tasks
+        list_del(&p->other_rr_run_list);
+        rq->other_rr.nr_running--;
+    }
 }
 
 /*
@@ -56,8 +62,7 @@ static void requeue_task_other_rr(struct rq *rq, struct task_struct *p)
 /*
  * current process is relinquishing control of the CPU
  */
-    static void
-yield_task_other_rr(struct rq *rq)
+static void yield_task_other_rr(struct rq *rq)
 {
     requeue_task_other_rr(rq, &rq->curr);
 }
@@ -79,7 +84,6 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
     struct list_head *queue = &rq->other_rr.queue;
     struct other_rr_rq *other_rr_rq = &rq->other_rr;
 
-    //if (other_rr_rq->nr_running < 1) {
     if (list_empty(queue)) {
         next = NULL;
     }
@@ -199,16 +203,6 @@ static void task_tick_other_rr(struct rq *rq, struct task_struct *p,int queued)
         else {
             p->task_time_slice--;
         }
-        /*
-        if (p->task_time_slice != 0) { 
-            p->task_time_slice--;
-        } 
-        else {
-            p->task_time_slice = other_rr_time_slice;
-            set_tsk_need_resched(p);
-            requeue_task_other_rr(rq, p);
-        }
-        */
     } 
 }
 
