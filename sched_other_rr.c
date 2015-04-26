@@ -31,23 +31,19 @@ static void update_curr_other_rr(struct rq *rq)
  */
 static void enqueue_task_other_rr(struct rq *rq, struct task_struct *p, int wakeup, bool b)
 {
-    if (wakeup) {
-        update_curr_other_rr(rq);
-        // add task to list tail, increment number of running tasks
-        list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
-        rq->other_rr.nr_running++;
-    }
+    update_curr_other_rr(rq);
+    // add task to list tail, increment number of running tasks
+    list_add_tail(&p->other_rr_run_list, &rq->other_rr.queue);
+    rq->other_rr.nr_running++;
 }
 
 static void dequeue_task_other_rr(struct rq *rq, struct task_struct *p, int sleep)
 {
-    if (sleep) {
-        // first update the task's runtime statistics
-        update_curr_other_rr(rq);
-        // remove task from head, decrement number of running tasks
-        list_del(&p->other_rr_run_list);
-        rq->other_rr.nr_running--;
-    }
+    // first update the task's runtime statistics
+    update_curr_other_rr(rq);
+    // remove task from head, decrement number of running tasks
+    list_del(&p->other_rr_run_list);
+    rq->other_rr.nr_running--;
 }
 
 /*
