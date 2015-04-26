@@ -78,7 +78,6 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
 {
     struct task_struct *next;
     struct list_head *queue = &rq->other_rr.queue;
-    struct other_rr_rq *other_rr_rq = &rq->other_rr;
 
     if (list_empty(queue)) {
         next = NULL;
