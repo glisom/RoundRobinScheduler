@@ -6559,9 +6559,6 @@ recheck:
 		policy != SCHED_NORMAL && policy != SCHED_BATCH &&
 		policy != SCHED_IDLE && policy != SCHED_OTHER_RR)
 			return -EINVAL;
-
-    //if (policy == SCHED_OTHER_RR)
-    //  printk("'SCHED_OTHER_RR POLICY' HAS BEEN SELECTED\n");
 	}
   
 	/*
