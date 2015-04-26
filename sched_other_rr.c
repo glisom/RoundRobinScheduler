@@ -79,9 +79,11 @@ static struct task_struct *pick_next_task_other_rr(struct rq *rq)
     struct task_struct *next;
     struct list_head *queue = &rq->other_rr.queue;
 
+    // check if the task queue is empty, finish if so
     if (list_empty(queue)) {
         next = NULL;
     }
+    // else get the next task, update its start statistic
     else {
         next = list_first_entry(queue, struct task_struct, other_rr_run_list);
 
@@ -143,8 +145,7 @@ static struct task_struct *load_balance_next_other_rr(void *arg)
     return p;
 }
 
-    static unsigned long
-load_balance_other_rr(struct rq *this_rq, int this_cpu, struct rq *busiest,
+static unsigned long load_balance_other_rr(struct rq *this_rq, int this_cpu, struct rq *busiest,
         unsigned long max_load_move,
         struct sched_domain *sd, enum cpu_idle_type idle,
         int *all_pinned, int *this_best_prio)
@@ -185,16 +186,19 @@ static void task_tick_other_rr(struct rq *rq, struct task_struct *p,int queued)
     // first update the task's runtime statistics
     update_curr_other_rr(rq);
 
-    // not yet implemented
+    // check if quantum is 0, if so, always proceed with the task until it is
+    // finished
     if (other_rr_time_slice == 0) {
         return;
-    } 
+    }
+    // else check if the slice is 0, if so queue the next task
     else {
         if (p->task_time_slice == 0) {
             p->task_time_slice = other_rr_time_slice;
             set_tsk_need_resched(p);
             requeue_task_other_rr(rq, p);
         }
+        // else decrement the time slice
         else {
             p->task_time_slice--;
         }
